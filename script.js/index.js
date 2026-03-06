@@ -44,6 +44,7 @@ async function loadCard() {
 }
 function displayCard(cards){
     btnContainer.innerHTML = '';
+    issueCount.innerText = cards.length;
     cards.forEach(card => {
         const div = document.createElement('div');
 
@@ -77,3 +78,16 @@ function displayCard(cards){
     });
 }
 loadCard()
+// search input select 
+const searchInput = document.querySelector('input[type="search"]');
+
+searchInput.addEventListener('input', () => {
+    const query = searchInput.value.toLowerCase();
+
+    const filtered = allCards.filter(card =>
+        card.title.toLowerCase().includes(query) ||
+        card.description.toLowerCase().includes(query)
+    );
+
+    displayCard(filtered);
+});
