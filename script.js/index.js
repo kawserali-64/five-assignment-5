@@ -13,8 +13,6 @@ const createElements = (arr) => {
 }
 
 
-
-
 const btnContainer = document.getElementById('btn-container');
 const issueCount = document.getElementById('issueCount');
 
@@ -39,6 +37,8 @@ function filterIssues(status, btn) {
 
 }
 
+// spinner
+
 async function loadCard() {
     const res = await fetch('https://phi-lab-server.vercel.app/api/v1/lab/issues')
     const data = await res.json();
@@ -54,7 +54,7 @@ const loadModal = async (id) => {
 }
 
 
-const displayModal = (card) =>{
+const displayModal = (card) => {
 
     let statusText = card.status === "closed" ? "Closed" : "Opened";
     let statusClass = card.status === "closed" ? "badge-error" : "badge-success";
@@ -110,15 +110,21 @@ function displayCard(cards) {
         // card.status
         const borderClass = (card.status === 'closed') ? 'border-purple-500' : 'border-green-500';
 
+        let priorityClass = '';
+        if (card.priority.toLowerCase() === 'high') priorityClass = 'badge badge-soft badge-error';
+        else if (card.priority.toLowerCase() === 'medium') priorityClass = 'badge badge-soft badge-warning';
+        else if (card.priority.toLowerCase() === 'low') priorityClass = 'badge badge-soft badge-info';
+        else priorityClass = 'badge-outline';
 
+         const statusImg = card.status === 'closed' ? './assets/Closed- Status .png' : 'assets/Open-Status.png';
 
         div.className = `card shadow-xl border-t-8 ${borderClass}`;
         div.innerHTML = `
             <div  onclick="loadModal(${card.id})" class="">
                 <div class="card-body">
                     <div class="flex justify-between">
-                        <img class="w-5 h-5" src="./assets/Open-Status.png" alt="">
-                        <div class="badge badge-warning">${card.priority}</div>
+                       <img class="w-5 h-5" src="${statusImg}" alt="${card.status}">
+                       <div class="badge ${priorityClass}">${card.priority}</div>
                     </div>
                     <h2 class="text-xl font-bold">${card.title}</h2>
                     <p class=" text-[#64748B]">${card.description}</p>
