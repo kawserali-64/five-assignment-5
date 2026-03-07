@@ -12,9 +12,9 @@ const createElements = (arr) => {
     }).join(' ');
 }
 
-
 const btnContainer = document.getElementById('btn-container');
 const issueCount = document.getElementById('issueCount');
+const spinner = document.getElementById('spinner');  
 
 let allCards = []
 
@@ -24,26 +24,22 @@ function filterIssues(status, btn) {
         button.classList.remove('btn-primary');
     });
 
-    // clicked 
     btn.classList.add('btn-primary');
 
-    if (status === "all") {
-        displayCard(allCards);
-        return;
-    }
-
-    const filtered = allCards.filter(card => card.status === status);
-    displayCard(filtered, status);
-
+    loadCard(status); 
 }
 
-// spinner
-
-async function loadCard() {
-    const res = await fetch('https://phi-lab-server.vercel.app/api/v1/lab/issues')
+async function loadCard(status = "all") {
+    spinner.classList.remove('hidden');
+    const res = await fetch('https://phi-lab-server.vercel.app/api/v1/lab/issues');
     const data = await res.json();
     allCards = data.data;
-    displayCard(allCards);
+    let cardsToShow = allCards;
+    if (status !== "all") {
+        cardsToShow = allCards.filter(card => card.status === status);
+    }
+    displayCard(cardsToShow);
+    spinner.classList.add('hidden');
 }
 
 const loadModal = async (id) => {
@@ -53,14 +49,10 @@ const loadModal = async (id) => {
     displayModal(data.data);
 }
 
-
 const displayModal = (card) => {
-
     let statusText = card.status === "closed" ? "Closed" : "Opened";
     let statusClass = card.status === "closed" ? "badge-error" : "badge-success";
-
     const detailsBox = document.getElementById('details-container');
-
     detailsBox.innerHTML = `
         <div>
             <h1 class="text-2xl font-bold">${card.title}</h1>
@@ -100,24 +92,18 @@ const displayModal = (card) => {
     document.getElementById('cardModal').showModal();
 }
 
-
 function displayCard(cards) {
     btnContainer.innerHTML = '';
     issueCount.innerText = cards.length;
     cards.forEach(card => {
         const div = document.createElement('div');
-
-        // card.status
         const borderClass = (card.status === 'closed') ? 'border-purple-500' : 'border-green-500';
-
         let priorityClass = '';
         if (card.priority.toLowerCase() === 'high') priorityClass = 'badge badge-soft badge-error';
         else if (card.priority.toLowerCase() === 'medium') priorityClass = 'badge badge-soft badge-warning';
         else if (card.priority.toLowerCase() === 'low') priorityClass = 'badge badge-soft badge-info';
         else priorityClass = 'badge-outline';
-
-         const statusImg = card.status === 'closed' ? './assets/Closed- Status .png' : 'assets/Open-Status.png';
-
+        const statusImg = card.status === 'closed' ? './assets/Closed- Status .png' : 'assets/Open-Status.png';
         div.className = `card shadow-xl border-t-8 ${borderClass}`;
         div.innerHTML = `
             <div  onclick="loadModal(${card.id})" class="">
@@ -143,16 +129,15 @@ function displayCard(cards) {
     });
 }
 loadCard()
+
 // search input select 
 const searchInput = document.querySelector('input[type="search"]');
 
 searchInput.addEventListener('input', () => {
     const query = searchInput.value.toLowerCase();
-
     const filtered = allCards.filter(card =>
         card.title.toLowerCase().includes(query) ||
         card.description.toLowerCase().includes(query)
     );
-
     displayCard(filtered);
 });
